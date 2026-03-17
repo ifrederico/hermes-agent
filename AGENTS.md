@@ -2,6 +2,18 @@
 
 Instructions for AI coding assistants and developers working on the hermes-agent codebase.
 
+## Read This First
+
+Before doing any git, branch, remote, deploy, or server-maintenance work, read
+[`docs/fork-workflow.md`](docs/fork-workflow.md).
+
+That document defines the non-default workflow for this repo:
+- `origin` is the `ifrederico/hermes-agent` fork and is the only push target
+- `upstream` is `NousResearch/hermes-agent` and is read-only
+- `main` is the product branch in the fork
+- `deploy` is the branch the server runs
+- upstream changes are adopted intentionally, not automatically
+
 ## Development Environment
 
 ```bash
