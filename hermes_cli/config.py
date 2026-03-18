@@ -236,7 +236,6 @@ DEFAULT_CONFIG = {
         "streaming": False,
         "show_cost": False,       # Show $ cost in the status bar (off by default)
         "skin": "default",
-        "theme_mode": "auto",
     },
 
     # Privacy settings
@@ -333,6 +332,14 @@ DEFAULT_CONFIG = {
         "auto_thread": True,           # Auto-create threads on @mention in channels (like Slack)
     },
 
+    # WhatsApp platform settings (gateway mode)
+    "whatsapp": {
+        # Reply prefix prepended to every outgoing WhatsApp message.
+        # Default (None) uses the built-in "⚕ *Hermes Agent*" header.
+        # Set to "" (empty string) to disable the header entirely.
+        # Supports \n for newlines, e.g. "🤖 *My Bot*\n──────\n"
+    },
+
     # Approval mode for dangerous commands:
     #   manual — always prompt the user (default)
     #   smart  — use auxiliary LLM to auto-approve low-risk commands, prompt for high-risk
@@ -365,7 +372,7 @@ DEFAULT_CONFIG = {
     },
 
     # Config schema version - bump this when adding new required fields
-    "_config_version": 11,
+    "_config_version": 12,
 }
 
 # =============================================================================
@@ -381,6 +388,7 @@ ENV_VARS_BY_VERSION: Dict[int, List[str]] = {
         "SLACK_BOT_TOKEN", "SLACK_APP_TOKEN", "SLACK_ALLOWED_USERS"],
     10: ["TAVILY_API_KEY"],
     11: ["WHATSAPP_REPLY_PREFIX"],
+    12: ["API_SERVER_ENABLED", "API_SERVER_KEY", "API_SERVER_PORT", "API_SERVER_HOST"],
 }
 
 # Required environment variables with metadata for migration prompts.
@@ -772,6 +780,38 @@ OPTIONAL_ENV_VARS = {
     "WHATSAPP_REPLY_PREFIX": {
         "description": "Optional WhatsApp reply prefix. Use an empty value to disable it. Supports \\n escapes.",
         "prompt": "WhatsApp reply prefix",
+        "url": None,
+        "password": False,
+        "category": "messaging",
+        "advanced": True,
+    },
+    "API_SERVER_ENABLED": {
+        "description": "Enable the OpenAI-compatible API server (true/false). Allows frontends like Open WebUI, LobeChat, etc. to connect.",
+        "prompt": "Enable API server (true/false)",
+        "url": None,
+        "password": False,
+        "category": "messaging",
+        "advanced": True,
+    },
+    "API_SERVER_KEY": {
+        "description": "Bearer token for API server authentication. If empty, all requests are allowed (local use only).",
+        "prompt": "API server auth key (optional)",
+        "url": None,
+        "password": True,
+        "category": "messaging",
+        "advanced": True,
+    },
+    "API_SERVER_PORT": {
+        "description": "Port for the API server (default: 8642).",
+        "prompt": "API server port",
+        "url": None,
+        "password": False,
+        "category": "messaging",
+        "advanced": True,
+    },
+    "API_SERVER_HOST": {
+        "description": "Host/bind address for the API server (default: 127.0.0.1). Use 0.0.0.0 for network access — requires API_SERVER_KEY for security.",
+        "prompt": "API server host",
         "url": None,
         "password": False,
         "category": "messaging",
