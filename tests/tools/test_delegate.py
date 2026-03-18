@@ -21,6 +21,8 @@ from tools.delegate_tool import (
     DELEGATE_TASK_SCHEMA,
     MAX_CONCURRENT_CHILDREN,
     MAX_DEPTH,
+    _build_child_agent,
+    _run_single_child,
     check_delegate_requirements,
     delegate_task,
     _build_child_system_prompt,
@@ -290,6 +292,47 @@ class TestToolNamePreservation(unittest.TestCase):
             self.assertEqual(result["results"][0]["status"], "error")
 
         self.assertEqual(model_tools._last_resolved_tool_names, original_tools)
+
+    def test_run_single_child_unregisters_child_after_success_and_failure(self):
+        """Real build->run cleanup must remove children on both outcomes."""
+        import model_tools
+
+        original_tools = ["terminal", "read_file", "web_search"]
+        scenarios = [
+            (
+                "success",
+                {"final_response": "done", "completed": True, "api_calls": 1},
+                "completed",
+            ),
+            ("failure", RuntimeError("boom"), "error"),
+        ]
+
+        for label, outcome, expected_status in scenarios:
+            with self.subTest(label=label):
+                parent = _make_mock_parent(depth=0)
+                model_tools._last_resolved_tool_names = list(original_tools)
+
+                with patch("run_agent.AIAgent") as MockAgent:
+                    mock_child = MagicMock()
+                    if isinstance(outcome, Exception):
+                        mock_child.run_conversation.side_effect = outcome
+                    else:
+                        mock_child.run_conversation.return_value = outcome
+                    MockAgent.return_value = mock_child
+
+                    child = _build_child_agent(
+                        0,
+                        "Cleanup test",
+                        None,
+                        None,
+                        None,
+                        5,
+                        parent,
+                    )
+                    result = _run_single_child(0, "Cleanup test", child, parent)
+
+                self.assertEqual(result["status"], expected_status)
+                self.assertEqual(parent._active_children, [])
 
 
 class TestDelegateObservability(unittest.TestCase):

@@ -235,6 +235,7 @@ def _build_child_agent(
 
     # Set delegation depth so children can't spawn grandchildren
     child._delegate_depth = getattr(parent_agent, '_delegate_depth', 0) + 1
+    child._delegate_saved_tool_names = list(_saved_tool_names)
 
     # Register child for interrupt propagation
     if hasattr(parent_agent, '_active_children'):
@@ -372,7 +373,13 @@ def _run_single_child(
     finally:
         # Restore the parent's tool names so the process-global is correct
         # for any subsequent execute_code calls or other consumers.
-        model_tools._last_resolved_tool_names = _saved_tool_names
+        saved_tool_names = getattr(child, "_delegate_saved_tool_names", None)
+        if saved_tool_names is not None:
+            try:
+                import model_tools
+                model_tools._last_resolved_tool_names = list(saved_tool_names)
+            except Exception as e:
+                logger.debug("Could not restore parent tool names: %s", e)
 
         # Unregister child from interrupt propagation
         if hasattr(parent_agent, '_active_children'):
