@@ -12,13 +12,10 @@ Hermes has a plugin system for adding custom tools, hooks, and integrations with
 
 Drop a directory into `~/.hermes/plugins/` with a `plugin.yaml` and Python code:
 
-```
-~/.hermes/plugins/my-plugin/
-├── plugin.yaml      # manifest
-├── __init__.py      # register() — wires schemas to handlers
-├── schemas.py       # tool schemas (what the LLM sees)
-└── tools.py         # tool handlers (what runs when called)
-```
+- `~/.hermes/plugins/my-plugin/plugin.yaml` — manifest
+- `~/.hermes/plugins/my-plugin/__init__.py` — `register()` wires schemas to handlers
+- `~/.hermes/plugins/my-plugin/schemas.py` — tool schemas (what the LLM sees)
+- `~/.hermes/plugins/my-plugin/tools.py` — tool handlers (what runs when called)
 
 Start Hermes — your tools appear alongside built-in tools. The model can call them immediately.
 
